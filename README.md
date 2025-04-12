@@ -1,44 +1,78 @@
-# Intelligent Document Processing with AI-Powered Query System
+# Intelligent Document Processing with AI-Powered Agent
 
 ## Overview
-This project extracts text from documents stored in Amazon S3 using AWS Textract, preprocesses the text with NLP techniques, stores embeddings in Pinecone, and enables retrieval-augmented generation (RAG) using Amazon Titan LLM for querying.
+This project extracts text from PDF documents stored in Amazon S3 using AWS Textract, preprocesses the text with NLP techniques, stores vector embeddings in Pinecone, and enables context-based question-answering using Amazon Titan LLM. It supports multi-turn conversation with memory, functioning as an intelligent AI agent.
 
 ## Features
-- Extracts text from PDF documents stored in Amazon S3 using AWS Textract.
-- Processes text using NLTK (tokenization, stopword removal, lemmatization).
-- Embeds text using a Hugging Face sentence-transformer model.
-- Stores and retrieves embeddings using Pinecone.
-- Uses Amazon Titan LLM to generate answers to user queries based on retrieved context.
-- Future Integration: AI agent for enhanced query processing.
+- Extracts text from PDF documents stored in Amazon S3 using **AWS Textract**.
+- Preprocesses text using **NLTK** (tokenization, stopword removal, lemmatization).
+- Converts text into embeddings with Hugging Face's `multi-qa-mpnet-base-cos-v1` model.
+- Stores and retrieves embeddings via **Pinecone**.
+- Answers questions using **Amazon Titan LLM** via a retrieval-augmented generation (RAG) approach.
+- Maintains conversation context with memory to enable follow-up questions.
 
-## Requirements
-### Install Dependencies
+## Installation
+
+### Install Required Packages
 ```bash
-pip install boto3 langchain langchain-pinecone langchain-community nltk sentence-transformers
+pip install -U boto3 langchain langchain-pinecone langchain-community nltk sentence-transformers langchain-huggingface
 ```
 
-### Set Up Required Credentials
-Before running the script, update the following credentials in the script:
+### Download NLTK Resources
+Before running the script, download the required NLTK components:
 ```python
-AWS_ACCESS_KEY_ID = ''  # Replace with your AWS Access Key ID
-AWS_SECRET_ACCESS_KEY = ''  # Replace with your AWS Secret Access Key
-AWS_REGION = 'us-east-1'  # AWS region (default: us-east-1)
-PINECONE_API_KEY = ''  # Replace with your Pinecone API Key
-PINECONE_INDEX = ''  # Replace with your Pinecone Index Name
-S3_BUCKET_NAME = ''  # S3 bucket name where the document is stored
-PDF_FILE_NAME = ''  # Filename of the document to process
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+```
+
+## Set Up Required Credentials
+Before running, update the following values in your script:
+```python
+AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
+AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
+AWS_REGION = 'us-east-1'
+
+PINECONE_API_KEY = 'your-pinecone-api-key'
+PINECONE_INDEX = 'your-pinecone-index-name'
+
+S3_BUCKET_NAME = 'your-s3-bucket-name'
+PDF_FILE_NAME = 'your-document.pdf'
 ```
 
 ## Usage
-1. Upload your document (PDF) to an S3 bucket.
-2. Run the script to extract and preprocess the text.
-3. The text is embedded and stored in Pinecone for retrieval.
-4. Enter your query when prompted, and the system will generate an answer using Amazon Titan LLM.
+
+1. **Upload your PDF document** to your S3 bucket.
+2. **Run the script** to extract and preprocess text using AWS Textract and NLTK.
+3. **Generate embeddings** using the Hugging Face sentence-transformer and store them in Pinecone.
+4. **Start the conversation loop** and interact with the AI agent by asking questions. The agent will provide answers based on the document context and previous conversation history.
+
+## AI Agent Behavior
+This system uses memory to maintain context over multiple interactions. For example:
+
+```
+User: What was the net revenue of Acme Corp in 2023?
+AI: Acme Corp reported a net revenue of $5.2 million in 2023.
+
+User: What contributed to that growth?
+AI: The main contributors were increased product sales in the North American market and the successful launch of their AI-driven analytics platform.
+
+User: Was there any decline in other segments?
+AI: Yes, there was a slight decline in the hardware division due to supply chain issues.
+```
+
+The AI remembers your previous questions to enhance context and answer follow-ups accordingly.
+
+## Example Use Case
+Assume your document is an annual report for a company. You might ask questions like:
+- "What was the profit in 2022?"
+- "Which sectors performed best this year?"
+- "How does this year’s performance compare to last year?"
+  
+The agent uses the document context along with conversation memory to provide accurate, context-aware answers.
 
 ## Future Enhancements
-- **AI Agent Integration:** Plan to integrate an AI agent for more advanced query processing and automation.
-- **Multi-document Support:** Extend capabilities to handle multiple documents.
-- **GUI or API Development:** Create a user-friendly interface or API for easier access.
-
-## License
-This project is licensed under [MIT License](LICENSE).
+- Develop a Graphical User Interface (GUI) or REST API for easier interaction.
+- Support multiple documents simultaneously.
+- Integrate with enterprise document processing pipelines.
