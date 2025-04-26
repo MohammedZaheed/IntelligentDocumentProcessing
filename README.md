@@ -1,15 +1,19 @@
 # Intelligent Document Processing with AI-Powered Agent
 
 ## Overview
-This project extracts text from PDF documents stored in Amazon S3 using AWS Textract, preprocesses the text with NLP techniques, stores vector embeddings in Pinecone, and enables context-based question-answering using Amazon Titan LLM. It supports multi-turn conversation with memory, functioning as an intelligent AI agent.
+This project extracts text from PDF documents stored in Amazon S3 using AWS Textract, preprocesses it with NLP techniques, stores vector embeddings in Pinecone, and enables intelligent document-based question-answering using Amazon Titan LLMs.  
+It automatically evaluates multiple model outputs (Titan Express and Titan Premier) and selects the best answer based on similarity and fluency scoring.
+
+It supports multi-turn conversation with memory, functioning as an intelligent AI agent.
 
 ## Features
 - Extracts text from PDF documents stored in Amazon S3 using **AWS Textract**.
 - Preprocesses text using **NLTK** (tokenization, stopword removal, lemmatization).
-- Converts text into embeddings with Hugging Face's `multi-qa-mpnet-base-cos-v1` model.
-- Stores and retrieves embeddings via **Pinecone**.
-- Answers questions using **Amazon Titan LLM** via a retrieval-augmented generation (RAG) approach.
-- Maintains conversation context with memory to enable follow-up questions.
+- Converts text into embeddings with **Hugging Face's multi-qa-mpnet-base-cos-v1** model.
+- Stores and retrieves document embeddings via **Pinecone**.
+- Answers questions using a **retrieval-augmented generation (RAG)** approach with **Amazon Titan Express** and **Amazon Titan Premier** models.
+- **Evaluates and selects** the best model response based on query similarity, context similarity, and fluency.
+- Maintains conversation memory to enable follow-up questions and natural dialogue flow.
 
 ## Installation
 
@@ -19,7 +23,6 @@ pip install -U boto3 langchain langchain-pinecone langchain-community nltk sente
 ```
 
 ### Download NLTK Resources
-Before running the script, download the required NLTK components:
 ```python
 import nltk
 nltk.download('punkt')
@@ -28,7 +31,8 @@ nltk.download('wordnet')
 ```
 
 ## Set Up Required Credentials
-Before running, update the following values in your script:
+Before running, configure your credentials and settings:
+
 ```python
 AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
 AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
@@ -44,35 +48,51 @@ PDF_FILE_NAME = 'your-document.pdf'
 ## Usage
 
 1. **Upload your PDF document** to your S3 bucket.
-2. **Run the script** to extract and preprocess text using AWS Textract and NLTK.
-3. **Generate embeddings** using the Hugging Face sentence-transformer and store them in Pinecone.
-4. **Start the conversation loop** and interact with the AI agent by asking questions. The agent will provide answers based on the document context and previous conversation history.
+2. **Run the script** to extract text using AWS Textract.
+3. **Preprocess the extracted text** using NLP techniques.
+4. **Generate vector embeddings** and **store them** in Pinecone.
+5. **Ask questions** in a loop.  
+   The system:
+   - Retrieves relevant document context,
+   - Queries **Titan Express** and **Titan Premier** models,
+   - **Evaluates** their answers automatically,
+   - **Selects and displays the best** response to you,
+   - **Maintains chat history** to improve follow-up answers.
 
 ## AI Agent Behavior
-This system uses memory to maintain context over multiple interactions. For example:
+This AI system remembers your previous questions and responses to maintain context throughout the conversation.  
+It uses both document knowledge and prior dialogue to answer your follow-up questions intelligently.
 
+**Example Conversation:**
 ```
-User: What was the net revenue of Acme Corp in 2023?
-AI: Acme Corp reported a net revenue of $5.2 million in 2023.
+Ask a question (or type 'exit' to quit): what is section 66A
 
-User: What contributed to that growth?
-AI: The main contributors were increased product sales in the North American market and the successful launch of their AI-driven analytics platform.
+Answer from Premier:
+Section 66A of the Information Technology Act, 2000 of India was a provision that defined the punishment for sending offensive messages through communication services.
 
-User: Was there any decline in other segments?
-AI: Yes, there was a slight decline in the hardware division due to supply chain issues.
+[Evaluation Summary]
+Query Similarity: 0.450
+Context Similarity: 0.515
+Fluency: High (0.220)
+Final Score: 0.426
 ```
 
-The AI remembers your previous questions to enhance context and answer follow-ups accordingly.
+The system automatically evaluates:
+- **Query Similarity** (How close the answer is to the question),
+- **Context Similarity** (How well the answer matches the document context),
+- **Fluency** (Answer quality in English),
+- and selects the highest scoring answer.
 
 ## Example Use Case
-Assume your document is an annual report for a company. You might ask questions like:
-- "What was the profit in 2022?"
-- "Which sectors performed best this year?"
-- "How does this year’s performance compare to last year?"
-  
-The agent uses the document context along with conversation memory to provide accurate, context-aware answers.
+Assume your document is an annual company report. You might ask:
+- "What was the revenue in 2022?"
+- "What led to the increase?"
+- "Were there any divisions that underperformed?"
+
+The agent will pull context from the document, maintain memory of previous queries, and continuously validate the best answer for you.
 
 ## Future Enhancements
-- Develop a Graphical User Interface (GUI) or REST API for easier interaction.
-- Support multiple documents simultaneously.
-- Integrate with enterprise document processing pipelines.
+- Build a Graphical User Interface (GUI) or REST API for easier interaction.
+- Support querying across **multiple documents**.
+- Improve conversation evaluation with more sophisticated scoring strategies.
+- Integrate into enterprise document pipelines.
