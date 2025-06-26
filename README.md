@@ -1,28 +1,44 @@
-# Intelligent Document Processing with AI-Powered Agent
+# 🧠 Intelligent Document Processing with AI-Powered Evaluation Agent
 
-## Overview
-This project extracts text from PDF documents stored in Amazon S3 using AWS Textract, preprocesses it with NLP techniques, stores vector embeddings in Pinecone, and enables intelligent document-based question-answering using Amazon Titan LLMs.  
-It automatically evaluates multiple model outputs (Titan Express and Titan Premier) and selects the best answer based on similarity and fluency scoring.
+## 🔍 Overview
 
-It supports multi-turn conversation with memory, functioning as an intelligent AI agent.
+This project extracts and processes text from PDF documents stored in **Amazon S3** using **AWS Textract**, applies **NLP preprocessing**, stores semantic vector embeddings in **Pinecone**, and enables intelligent **RAG-based multi-turn question-answering** using Amazon **Titan Express**, **Premier**, and **Lite** models via **Amazon Bedrock**.
 
-## Features
-- Extracts text from PDF documents stored in Amazon S3 using **AWS Textract**.
-- Preprocesses text using **NLTK** (tokenization, stopword removal, lemmatization).
-- Converts text into embeddings with **Hugging Face's multi-qa-mpnet-base-cos-v1** model.
-- Stores and retrieves document embeddings via **Pinecone**.
-- Answers questions using a **retrieval-augmented generation (RAG)** approach with **Amazon Titan Express** and **Amazon Titan Premier** models.
-- **Evaluates and selects** the best model response based on query similarity, context similarity, and fluency.
-- Maintains conversation memory to enable follow-up questions and natural dialogue flow.
+It performs **automated evaluation and model selection** using similarity, fluency, and generation time metrics, and maintains chat history for natural multi-turn interaction.
 
-## Installation
+---
 
-### Install Required Packages
+## 🚀 Key Features
+
+* 🔓 Extracts text from PDFs stored in **S3** using **AWS Textract** (asynchronous detection).
+* 🧹 Preprocesses text using **NLTK**: tokenization, stopword removal, lemmatization.
+* 🔗 Converts text to embeddings with **HuggingFace’s `multi-qa-mpnet-base-cos-v1`** model.
+* 📦 Stores and retrieves embeddings with **Pinecone** for semantic similarity search.
+* 💬 Answers questions using **retrieval-augmented generation (RAG)** with **Amazon Titan** LLMs:
+
+  * `Titan Text Express v1`
+  * `Titan Text Premier v1`
+  * `Titan Text Lite v1`
+* 📊 Evaluates responses automatically using:
+
+  * **Query Similarity**
+  * **Context Similarity**
+  * **Fluency (token-based)**
+  * **Generation Time**
+* 🏆 Dynamically selects the **best model response** per query based on composite scoring.
+* 🧠 Maintains **multi-turn conversation memory** to answer follow-up questions intelligently.
+* 📈 Provides per-model **performance analytics**: latency, throughput, and score trends.
+
+---
+
+## 🛠️ Installation
+
 ```bash
-pip install -U boto3 langchain langchain-pinecone langchain-community nltk sentence-transformers langchain-huggingface
+pip install -U boto3 langchain langchain-pinecone nltk sentence-transformers langchain-huggingface
 ```
 
-### Download NLTK Resources
+Then download NLTK resources:
+
 ```python
 import nltk
 nltk.download('punkt')
@@ -30,69 +46,136 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 ```
 
-## Set Up Required Credentials
-Before running, configure your credentials and settings:
+---
+
+## 🔧 Configuration
+
+Set your credentials:
 
 ```python
-AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
-AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
+# AWS
+AWS_ACCESS_KEY_ID = 'your-access-key'
+AWS_SECRET_ACCESS_KEY = 'your-secret-key'
 AWS_REGION = 'us-east-1'
 
-PINECONE_API_KEY = 'your-pinecone-api-key'
-PINECONE_INDEX = 'your-pinecone-index-name'
+# Pinecone
+PINECONE_API_KEY = 'your-pinecone-key'
+PINECONE_INDEX = 'your-index-name'
 
-S3_BUCKET_NAME = 'your-s3-bucket-name'
+# S3
+S3_BUCKET_NAME = 'your-s3-bucket'
 PDF_FILE_NAME = 'your-document.pdf'
 ```
 
-## Usage
+---
 
-1. **Upload your PDF document** to your S3 bucket.
-2. **Run the script** to extract text using AWS Textract.
-3. **Preprocess the extracted text** using NLP techniques.
-4. **Generate vector embeddings** and **store them** in Pinecone.
-5. **Ask questions** in a loop.  
-   The system:
-   - Retrieves relevant document context,
-   - Queries **Titan Express** and **Titan Premier** models,
-   - **Evaluates** their answers automatically,
-   - **Selects and displays the best** response to you,
-   - **Maintains chat history** to improve follow-up answers.
+## 📄 Usage Instructions
 
-## AI Agent Behavior
-This AI system remembers your previous questions and responses to maintain context throughout the conversation.  
-It uses both document knowledge and prior dialogue to answer your follow-up questions intelligently.
+### 1. 📤 Upload PDF to S3
 
-**Example Conversation:**
+Ensure your PDF is uploaded to the specified S3 bucket.
+
+### 2. 📝 Extract Text Using AWS Textract
+
+Text is extracted asynchronously using `start_document_text_detection`.
+
+### 3. 🧽 NLP Preprocessing
+
+The extracted text is cleaned using:
+
+* Tokenization
+* Stopword removal
+* Lemmatization
+
+### 4. 📐 Embedding & Storage
+
+The preprocessed text is split into chunks and embedded using HuggingFace, and stored in Pinecone for retrieval.
+
+### 5. 💬 Ask Questions via Interactive Loop
+
+The system retrieves relevant chunks, generates answers from all 3 Titan models, evaluates their quality, and shows the best one.
+
+---
+
+## 🧠 AI Agent Behavior
+
+* Maintains conversation history to handle **follow-up questions.**
+* Prompts are enriched with both **retrieved context** and **dialogue history.**
+* Uses a custom **prompt template** optimized for Titan models.
+
+---
+
+## 📊 Model Evaluation Metrics
+
+| Metric             | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| Query Similarity   | Semantic similarity between user question and model output |
+| Context Similarity | Similarity between document context and model output       |
+| Fluency Score      | Word count-based fluency score (normalized)                |
+| Generation Time    | Time taken by model to generate output                     |
+| Final Score        | Weighted average of all metrics (with time penalty)        |
+
+---
+
+## 🧪 Example Interaction
+
 ```
-Ask a question (or type 'exit' to quit): what is section 66A
+Ask a question (or type 'exit' to quit): If a company’s employee leaks customer data intentionally, which section(s) apply?
 
-Answer from Premier:
-Section 66A of the Information Technology Act, 2000 of India was a provision that defined the punishment for sending offensive messages through communication services.
-
-[Evaluation Summary]
-Query Similarity: 0.450
-Context Similarity: 0.515
-Fluency: High (0.220)
-Final Score: 0.426
+Answer from Express:
+Section 72 of the IT Act applies to the company’s employee in case of intentional leaking of customer data.
 ```
 
-The system automatically evaluates:
-- **Query Similarity** (How close the answer is to the question),
-- **Context Similarity** (How well the answer matches the document context),
-- **Fluency** (Answer quality in English),
-- and selects the highest scoring answer.
+### 🧮 Evaluation Summary
 
-## Example Use Case
-Assume your document is an annual company report. You might ask:
-- "What was the revenue in 2022?"
-- "What led to the increase?"
-- "Were there any divisions that underperformed?"
+```
+Model: Titan Express
+Query Similarity:     0.714
+Context Similarity:   0.295
+Fluency:              High (0.95)
+Generation Time:      3.14 sec
+Total Time:           3.56 sec
+Average Throughput:   0.065 responses/sec
+```
 
-The agent will pull context from the document, maintain memory of previous queries, and continuously validate the best answer for you.
+---
 
-## Future Enhancements
-- Build a Graphical User Interface (GUI) or REST API for easier interaction.
-- Support querying across **multiple documents**.
-- Improve conversation evaluation with more sophisticated scoring strategies.
-- Integrate into enterprise document pipelines.
+## 📈 Performance Dashboard (Example)
+
+| Metric                | Titan Express | Titan Premier | Titan Lite |
+| --------------------- | ------------- | ------------- | ---------- |
+| Query Similarity      | 0.734         | 0.729         | 0.704      |
+| Context Similarity    | 0.510         | 0.498         | 0.490      |
+| Fluency Score         | 0.980         | 0.940         | 0.910      |
+| Final Score           | 0.698         | 0.690         | 0.675      |
+| Embedding Time (s)    | 0.12          | 0.13          | 0.11       |
+| Retrieval Time (s)    | 0.38          | 0.42          | 0.33       |
+| Generation Time (s)   | 3.22          | 4.85          | 2.17       |
+| Total Time (s)        | 3.72          | 5.40          | 2.61       |
+| Avg. Throughput (r/s) | 0.28          | 0.18          | 0.38       |
+
+---
+
+## 📁 Output Files
+
+* `extracted_text.txt`: raw text extracted from PDF
+* `chat_history[]`: list of all user-assistant interactions
+* `DataFrame Summary`: Printed table with all average metrics
+
+---
+
+## 📌 Requirements
+
+* AWS Textract & Bedrock permissions
+* Pinecone index with `cosine` similarity
+* Python 3.8+
+* NLTK, Sentence Transformers, LangChain, Pandas, NumPy
+
+---
+
+## 📚 Future Enhancements
+
+* Add **UI/Streamlit frontend**
+* Integrate **OpenSearch or FAISS** as vector DB alternatives
+* Extend to **multiple PDFs** or **structured data (tables/forms)**
+* Add **chat summarization** and **knowledge graph generation**
